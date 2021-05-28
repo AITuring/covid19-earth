@@ -1,69 +1,79 @@
+import React from "react";
 import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import mapPoints from "./mapPoints.js";
+
 import "./earth.css";
 
-const Earth = () => {
-  const box = document.getElementById("box");
-  const canvas = document.getElementById("canvas");
+class Earth extends React.Component {
 
-  let glRender;
-  let camera;
-  let earthMesh;
-  let scene;
-  let meshGroup; // mesh容器
-  let controls;
+  componentDidMount() {
+    const box = document.getElementById("box");
+    const canvas = document.getElementById("canvas");
 
-  glRender = new THREE.WebGLRenderer({ canvas, alpha: true });
-  glRender.setSize(canvas.clientWidth, canvas.clientHeight, false);
+    let glRender;
+    let camera;
+    let earthMesh;
+    let scene;
+    let meshGroup; // mesh容器
+    let controls;
 
-  scene = new THREE.Scene();
+    glRender = new THREE.WebGLRenderer({ canvas, alpha: true });
+    glRender.setSize(canvas.clientWidth, canvas.clientHeight, false);
 
-  const fov = 45;
-  const aspect = canvas.clientWidth / canvas.clientHeight;
-  const near = 1;
-  const far = 4000;
-  camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+    scene = new THREE.Scene();
 
-  camera.position.z = 400;
+    const fov = 45;
+    const aspect = canvas.clientWidth / canvas.clientHeight;
+    const near = 1;
+    const far = 4000;
+    camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 
-  controls = new THREE.OrbitControls(camera, canvas);
-  controls.target.set(0, 0, 0);
+    camera.position.z = 400;
 
-  meshGroup = new THREE.Group();
+    controls = new OrbitControls(camera, canvas);
+    controls.target.set(0, 0, 0);
 
-  scene.add(meshGroup);
+    meshGroup = new THREE.Group();
 
-  const globeRadius = 100;
-  const globeSegments = 64;
-  const geometry = new THREE.SphereGeometry(
-    globeRadius,
-    globeSegments,
-    // 可能有问题
-    globeSegments
-  );
+    scene.add(meshGroup);
 
-  const material = new THREE.MeshBasicMaterial({
-    transparent: true,
-    opacity: 0.5,
-    color: 0x000000
-  });
+    const globeRadius = 100;
+    const globeSegments = 64;
+    const geometry = new THREE.SphereGeometry(
+      globeRadius,
+      globeSegments,
+      // 可能有问题
+      globeSegments
+    );
 
-  earthMesh = new THREE.Mesh(geometry, material);
+    const material = new THREE.MeshBasicMaterial({
+      transparent: true,
+      opacity: 0.5,
+      color: 0x000000
+    });
 
-  meshGroup.add(earthMesh);
+    earthMesh = new THREE.Mesh(geometry, material);
 
-  function screenRender() {
-    glRender.render(scene, camera);
-    controls.update();
-    requestAnimationFrame(screenRender);
+    meshGroup.add(earthMesh);
+
+    function screenRender() {
+      glRender.render(scene, camera);
+      controls.update();
+      requestAnimationFrame(screenRender);
+    }
+
+    screenRender();
   }
 
-  screenRender();
+  render () {
+    return (
+      <div id="box" style={{ width: "100%", height: "100%" }}>
+        <canvas id="canvas" style={{ width: "100%", height: "100%" }}></canvas>
+      </div>
+    );
+  }
 
-  return (
-    <div id="box" style={{ width: "100%", height: "100%" }}>
-      <canvas id="canvas" style={{ width: "100%", height: "100%" }}></canvas>
-    </div>
-  );
 };
 
 export default Earth;
