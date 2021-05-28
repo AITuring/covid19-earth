@@ -61,7 +61,7 @@ const Earth = () => {
 
   return (
     <div id="box" style={{ width: "100%", height: "100%" }}>
-      <canvas id="canvas"></canvas>
+      <canvas id="canvas" style={{ width: "100%", height: "100%" }}></canvas>
     </div>
   );
 };
