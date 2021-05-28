@@ -1,12 +1,12 @@
 import React from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils";
 import mapPoints from "./mapPoints.js";
 
 import "./earth.css";
 
 class Earth extends React.Component {
-
   componentDidMount() {
     const box = document.getElementById("box");
     const canvas = document.getElementById("canvas");
@@ -63,17 +63,53 @@ class Earth extends React.Component {
       requestAnimationFrame(screenRender);
     }
 
+    const globeWidth = 4098 / 2;
+    const globeHeight = 1968 / 2;
+
+    function convertFlatCoordsToSphereCoords(x, y) {
+      let latitude = ((x - globeWidth) / globeWidth) * -180;
+      let longitude = ((y - globeHeight) / globeHeight) * -90;
+      latitude = (latitude * Math.PI) / 180;
+      longitude = (longitude * Math.PI) / 180;
+      const radius = Math.cos(longitude) * globeRadius;
+      const dx = Math.cos(latitude) * radius;
+      const dy = Math.sin(longitude) * globeRadius;
+      const dz = Math.sin(latitude) * radius;
+      return { dx, dy, dz };
+    }
+
+    function createMapPoints() {
+      const metrial = new THREE.MeshBasicMaterial({ color: "#AAA" });
+
+      const sphere = [];
+
+      for (let point of mapPoints.points) {
+        const pos = convertFlatCoordsToSphereCoords(point.x, point.y);
+        if (pos.dx && pos.dy && pos.dz) {
+          const pingGeometry = new THREE.SphereGeometry(0.4, 5, 5);
+          pingGeometry.translate(pos.dx, pos.dy, pos.dz);
+          sphere.push(pingGeometry);
+        }
+      }
+
+      const earthMapPoints = new THREE.Mesh(
+        BufferGeometryUtils.mergeBufferGeometries(sphere),
+        metrial
+      );
+      meshGroup.add(earthMapPoints);
+    }
+
+    createMapPoints();
     screenRender();
   }
 
-  render () {
+  render() {
     return (
       <div id="box" style={{ width: "100%", height: "100%" }}>
         <canvas id="canvas" style={{ width: "100%", height: "100%" }}></canvas>
       </div>
     );
   }
-
-};
+}
 
 export default Earth;
