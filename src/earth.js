@@ -1,10 +1,11 @@
 import React from "react";
 import * as THREE from "three";
+import * as d3 from "d3";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils";
 import mapPoints from "./mapPoints.js";
-
 import "./earth.css";
+import data from "./data.js";
 
 class Earth extends React.Component {
   componentDidMount() {
@@ -98,6 +99,35 @@ class Earth extends React.Component {
       );
       meshGroup.add(earthMapPoints);
     }
+
+    const colors = ["#ffdfe0","#ffc0c0","#FF0000","#ee7070","#c80200","#900000","#510000","#290000"];
+    const domain = [1000,3000,10000,50000,100000,500000,1000000,1000000];
+
+    function createBar() {
+      if (!data || data.length === 0) return
+
+      let color
+      const scale = d3.scaleLinear().domain(domain).range(colors)
+
+      data.forEach(({lat, lng, value:size})=> {
+        color = scale(size)
+        const pos = convertFlatCoordsToSphereCoords(lat,lng,globeRadius)
+        if (pos.dx && pos.dy && pos.dz) {
+          const geometry = new THREE.BoxGeometry(2,2,1)
+          geometry.applyMatrix4(
+            new THREE.Matrix4().makeTranslation(0,0,-0.5)
+          )
+
+          const barMesh = new THREE.Mesh(
+            geometry,
+            new THREE.MeshBasicMaterial({color})
+          )
+          barMesh.position.set(pos.dx, pos.dy, pos.dz)
+          barMesh.lookAt(earthMesh.position)
+        } 
+      })
+    }
+
 
     createMapPoints();
     screenRender();
