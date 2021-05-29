@@ -172,6 +172,7 @@ class Earth extends React.Component {
   render() {
     return (
       <div id="box" style={{ width: "100vw", height: "100vh" }}>
+        <h2 style={{textAlign: 'center'}}>Covid-19 Earth</h2>
         <canvas id="canvas" style={{ width: "100%", height: "100%" }}></canvas>
       </div>
     );
