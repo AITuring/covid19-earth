@@ -80,7 +80,7 @@ class Earth extends React.Component {
     }
 
     function createMapPoints() {
-      const metrial = new THREE.MeshBasicMaterial({ color: "#AAA" });
+      const metrial = new THREE.MeshBasicMaterial({ color: "#f5f5f5" });
 
       const sphere = [];
 
@@ -125,7 +125,7 @@ class Earth extends React.Component {
           barMesh.position.set(pos.dx, pos.dy, pos.dz)
           barMesh.lookAt(earthMesh.position)
 
-          barMesh.scale.z = Math.max(size/20000, 0.1)
+          barMesh.scale.z = Math.max(size/60000, 0.1)
           barMesh.updateMatrix()
 
           meshGroup.add(barMesh)
@@ -151,7 +151,7 @@ function convertLatLngToSphereCoords(latitude, longitude, radius) {
 
   render() {
     return (
-      <div id="box" style={{ width: "100%", height: "100%" }}>
+      <div id="box" style={{ width: "100vw", height: "100vh" }}>
         <canvas id="canvas" style={{ width: "100%", height: "100%" }}></canvas>
       </div>
     );
