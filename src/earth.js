@@ -6,6 +6,7 @@ import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtil
 import mapPoints from "./mapPoints.js";
 import "./earth.css";
 import data from "./data.js";
+import { MathUtils } from "three";
 
 class Earth extends React.Component {
   componentDidMount() {
@@ -100,53 +101,66 @@ class Earth extends React.Component {
       meshGroup.add(earthMapPoints);
     }
 
-    const colors = ["#ffdfe0","#ffc0c0","#FF0000","#ee7070","#c80200","#900000","#510000","#290000"];
-    const domain = [1000,3000,10000,50000,100000,500000,1000000,1000000];
+    const colors = [
+      "#ffdfe0",
+      "#ffc0c0",
+      "#FF0000",
+      "#ee7070",
+      "#c80200",
+      "#900000",
+      "#510000",
+      "#290000"
+    ];
+    const domain = [1000, 3000, 10000, 50000, 100000, 500000, 1000000, 1000000];
 
     function createBar() {
-      if (!data || data.length === 0) return
+      if (!data || data.length === 0) return;
 
-      let color
-      const scale = d3.scaleLinear().domain(domain).range(colors)
+      let color;
+      const scale = d3.scaleLinear().domain(domain).range(colors);
 
-      data.forEach(({lat, lng, value:size})=> {
-        color = scale(size)
-        const pos = convertLatLngToSphereCoords(lat,lng,globeRadius)
+      data.forEach(({ lat, lng, value: size }) => {
+        color = scale(size);
+        const pos = convertLatLngToSphereCoords(lat, lng, globeRadius);
         if (pos.dx && pos.dy && pos.dz) {
-          const geometry = new THREE.BoxGeometry(2,2,1)
+          const geometry = new THREE.BoxGeometry(2, 2, 1);
           geometry.applyMatrix4(
-            new THREE.Matrix4().makeTranslation(0,0,-0.5)
-          )
+            new THREE.Matrix4().makeTranslation(0, 0, -0.5)
+          );
 
           const barMesh = new THREE.Mesh(
             geometry,
-            new THREE.MeshBasicMaterial({color})
-          )
-          barMesh.position.set(pos.dx, pos.dy, pos.dz)
-          barMesh.lookAt(earthMesh.position)
+            new THREE.MeshBasicMaterial({ color })
+          );
+          barMesh.position.set(pos.dx, pos.dy, pos.dz);
+          barMesh.lookAt(earthMesh.position);
 
-          barMesh.scale.z = Math.max(size/60000, 0.1)
-          barMesh.updateMatrix()
+          barMesh.scale.z = Math.max(size / 60000, 0.1);
+          barMesh.updateMatrix();
 
-          meshGroup.add(barMesh)
-        } 
-      })
+          meshGroup.add(barMesh);
+        }
+      });
     }
 
-function convertLatLngToSphereCoords(latitude, longitude, radius) {
-  const phi = (latitude * Math.PI) / 180
-  const theta = ((longitude - 180) * Math.PI) / 180
-  const dx = - (radius - 1) * Math.cos(phi) * Math.cos(theta)
-  const dy = (radius - 1) * Math.sin(phi)
-  const dz = (radius - 1) * Math.cos(phi) * Math.sin(theta)
-  return {dx, dy, dz}
+    function convertLatLngToSphereCoords(latitude, longitude, radius) {
+      const phi = (latitude * Math.PI) / 180;
+      const theta = ((longitude - 180) * Math.PI) / 180;
+      const dx = -(radius - 1) * Math.cos(phi) * Math.cos(theta);
+      const dy = (radius - 1) * Math.sin(phi);
+      const dz = (radius - 1) * Math.cos(phi) * Math.sin(theta);
+      return { dx, dy, dz };
+    }
 
-}
-
-
-    createMapPoints();
-    createBar();
-    screenRender();
+    function animate() {
+      requestAnimationFrame(animate);
+      createMapPoints();
+      createBar();
+      meshGroup.rotation.x += Math.PI * 0.01;
+      meshGroup.rotation.y += Math.PI * 0.01;
+      screenRender();
+    }
+    animate();
   }
 
   render() {
