@@ -6,7 +6,7 @@ import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtil
 import mapPoints from "./mapPoints.js";
 import "./earth.css";
 import data from "./data.js";
-import { MathUtils } from "three";
+// import { MathUtils } from "three";
 
 class Earth extends React.Component {
   componentDidMount() {
@@ -163,7 +163,7 @@ class Earth extends React.Component {
       T0 = T1
       requestAnimationFrame(animate);
       screenRender();
-      meshGroup.rotateY(0.04)
+      meshGroup.rotateY(0.01)
     }
 
     animate()
