@@ -152,15 +152,16 @@ class Earth extends React.Component {
       return { dx, dy, dz };
     }
 
+    createMapPoints();
+    createBar();
+
     function animate() {
       requestAnimationFrame(animate);
-      createMapPoints();
-      createBar();
-      meshGroup.rotation.x += Math.PI * 0.01;
-      meshGroup.rotation.y += Math.PI * 0.01;
+      // meshGroup.rotation.x += Math.PI * 0.01;
+      meshGroup.rotation.y += Math.PI * 0.05;
       screenRender();
     }
-    animate();
+    setInterval(animate, 20)
   }
 
   render() {
