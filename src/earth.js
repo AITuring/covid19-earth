@@ -6,7 +6,6 @@ import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtil
 import mapPoints from "./mapPoints.js";
 import "./earth.css";
 import data from "./data.js";
-// import { MathUtils } from "three";
 
 class Earth extends React.Component {
   componentDidMount() {
@@ -20,54 +19,76 @@ class Earth extends React.Component {
     let meshGroup; // mesh容器
     let controls;
 
-    glRender = new THREE.WebGLRenderer({ canvas, alpha: true });
-    glRender.setSize(canvas.clientWidth, canvas.clientHeight, false);
-
-    scene = new THREE.Scene();
-
-    const fov = 45;
-    const aspect = canvas.clientWidth / canvas.clientHeight;
-    const near = 1;
-    const far = 4000;
-    camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-
-    camera.position.z = 400;
-
-    controls = new OrbitControls(camera, canvas);
-    controls.target.set(0, 0, 0);
-
-    meshGroup = new THREE.Group();
-
-    scene.add(meshGroup);
-
+    const globeWidth = 4098 / 2;
+    const globeHeight = 1968 / 2;
     const globeRadius = 100;
     const globeSegments = 64;
-    const geometry = new THREE.SphereGeometry(
-      globeRadius,
-      globeSegments,
-      // 可能有问题
-      globeSegments
-    );
 
-    const material = new THREE.MeshBasicMaterial({
-      transparent: true,
-      opacity: 0.5,
-      color: 0x000000
-    });
+    // 渲染柱状图颜色和节点
+    const colors = [
+      "#ffdfe0",
+      "#ffc0c0",
+      "#FF0000",
+      "#ee7070",
+      "#c80200",
+      "#900000",
+      "#510000",
+      "#290000"
+    ];
+    const domain = [1000, 3000, 10000, 50000, 100000, 500000, 1000000, 1000000];
+    
+    // 创建渲染器
+    glRender = new THREE.WebGLRenderer({ canvas, alpha: true });
+    glRender.setSize(canvas.clientWidth, canvas.clientHeight, false);
+    // 创建场景
+    scene = new THREE.Scene();
+    meshGroup = new THREE.Group();
+    scene.add(meshGroup);
+    // 创建相机
+    function createCamera() {
+      const fov = 45;
+      const aspect = canvas.clientWidth / canvas.clientHeight;
+      const near = 1;
+      const far = 4000;
+      camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+      camera.position.z = 400;
+    }
+    // 创建地球
+    function createEarth() {
+      const geometry = new THREE.SphereGeometry(
+        globeRadius,
+        globeSegments,
+        // 可能有问题
+        globeSegments
+      );
 
-    earthMesh = new THREE.Mesh(geometry, material);
+      const material = new THREE.MeshBasicMaterial({
+        transparent: true,
+        opacity: 0.5,
+        color: 0x000000
+      });
 
-    meshGroup.add(earthMesh);
+      earthMesh = new THREE.Mesh(geometry, material);
+      meshGroup.add(earthMesh);
+    }
+    // 创建control
+    function createControl() {
+      controls = new OrbitControls(camera, canvas);
+      controls.target.set(0, 0, 0);
+    }
 
+    createCamera()
+    createEarth()
+    createControl()
+
+    // 渲染地球
     function screenRender() {
       glRender.render(scene, camera);
       controls.update();
       // requestAnimationFrame(screenRender);
     }
 
-    const globeWidth = 4098 / 2;
-    const globeHeight = 1968 / 2;
-
+    // 将平面二维点转化为三维
     function convertFlatCoordsToSphereCoords(x, y) {
       let latitude = ((x - globeWidth) / globeWidth) * -180;
       let longitude = ((y - globeHeight) / globeHeight) * -90;
@@ -79,10 +100,9 @@ class Earth extends React.Component {
       const dz = Math.sin(latitude) * radius;
       return { dx, dy, dz };
     }
-
+    // 给圆球上铺点
     function createMapPoints() {
       const metrial = new THREE.MeshBasicMaterial({ color: "#f5f5f5" });
-
       const sphere = [];
 
       for (let point of mapPoints.points) {
@@ -101,18 +121,17 @@ class Earth extends React.Component {
       meshGroup.add(earthMapPoints);
     }
 
-    const colors = [
-      "#ffdfe0",
-      "#ffc0c0",
-      "#FF0000",
-      "#ee7070",
-      "#c80200",
-      "#900000",
-      "#510000",
-      "#290000"
-    ];
-    const domain = [1000, 3000, 10000, 50000, 100000, 500000, 1000000, 1000000];
+    // 经纬度转化为球坐标
+    function convertLatLngToSphereCoords(latitude, longitude, radius) {
+      const phi = (latitude * Math.PI) / 180;
+      const theta = ((longitude - 180) * Math.PI) / 180;
+      const dx = -(radius - 1) * Math.cos(phi) * Math.cos(theta);
+      const dy = (radius - 1) * Math.sin(phi);
+      const dz = (radius - 1) * Math.cos(phi) * Math.sin(theta);
+      return { dx, dy, dz };
+    }
 
+    // 创建柱状图
     function createBar() {
       if (!data || data.length === 0) return;
 
@@ -143,36 +162,26 @@ class Earth extends React.Component {
       });
     }
 
-    function convertLatLngToSphereCoords(latitude, longitude, radius) {
-      const phi = (latitude * Math.PI) / 180;
-      const theta = ((longitude - 180) * Math.PI) / 180;
-      const dx = -(radius - 1) * Math.cos(phi) * Math.cos(theta);
-      const dy = (radius - 1) * Math.sin(phi);
-      const dz = (radius - 1) * Math.cos(phi) * Math.sin(theta);
-      return { dx, dy, dz };
-    }
-
-    createMapPoints();
-    createBar();
-
-    let T0 = new Date()
-
+    // 动画
     function animate() {
-      let T1 = new Date()
-      let t = T1 - T0
-      T0 = T1
       requestAnimationFrame(animate);
       screenRender();
-      meshGroup.rotateY(0.005)
+      // 每次旋转角速度0.04弧度
+      meshGroup.rotateY(0.04)
     }
 
+    // 创建点阵图
+    createMapPoints();
+    // 创建柱状统计图
+    createBar();
+    // 动画
     animate()
   }
 
   render() {
     return (
       <div id="box" style={{ width: "100vw", height: "100vh" }}>
-        <h2 style={{textAlign: 'center'}}>Covid-19 Earth</h2>
+        {/* <h2 style={{textAlign: 'center'}}>Covid-19 Earth</h2> */}
         <canvas id="canvas" style={{ width: "100%", height: "100%" }}></canvas>
       </div>
     );
