@@ -111,7 +111,7 @@ class Earth extends React.Component {
 
       data.forEach(({lat, lng, value:size})=> {
         color = scale(size)
-        const pos = convertFlatCoordsToSphereCoords(lat,lng,globeRadius)
+        const pos = convertLatLngToSphereCoords(lat,lng,globeRadius)
         if (pos.dx && pos.dy && pos.dz) {
           const geometry = new THREE.BoxGeometry(2,2,1)
           geometry.applyMatrix4(
@@ -124,12 +124,28 @@ class Earth extends React.Component {
           )
           barMesh.position.set(pos.dx, pos.dy, pos.dz)
           barMesh.lookAt(earthMesh.position)
+
+          barMesh.scale.z = Math.max(size/20000, 0.1)
+          barMesh.updateMatrix()
+
+          meshGroup.add(barMesh)
         } 
       })
     }
 
+function convertLatLngToSphereCoords(latitude, longitude, radius) {
+  const phi = (latitude * Math.PI) / 180
+  const theta = ((longitude - 180) * Math.PI) / 180
+  const dx = - (radius - 1) * Math.cos(phi) * Math.cos(theta)
+  const dy = (radius - 1) * Math.sin(phi)
+  const dz = (radius - 1) * Math.cos(phi) * Math.sin(theta)
+  return {dx, dy, dz}
+
+}
+
 
     createMapPoints();
+    createBar();
     screenRender();
   }
 
