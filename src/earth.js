@@ -163,7 +163,7 @@ class Earth extends React.Component {
       T0 = T1
       requestAnimationFrame(animate);
       screenRender();
-      meshGroup.rotateY(0.01)
+      meshGroup.rotateY(0.005)
     }
 
     animate()
