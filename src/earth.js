@@ -62,7 +62,7 @@ class Earth extends React.Component {
     function screenRender() {
       glRender.render(scene, camera);
       controls.update();
-      requestAnimationFrame(screenRender);
+      // requestAnimationFrame(screenRender);
     }
 
     const globeWidth = 4098 / 2;
@@ -155,13 +155,18 @@ class Earth extends React.Component {
     createMapPoints();
     createBar();
 
+    let T0 = new Date()
+
     function animate() {
+      let T1 = new Date()
+      let t = T1 - T0
+      T0 = T1
       requestAnimationFrame(animate);
-      // meshGroup.rotation.x += Math.PI * 0.01;
-      meshGroup.rotation.y += Math.PI * 0.05;
       screenRender();
+      meshGroup.rotateY(0.04)
     }
-    setInterval(animate, 20)
+
+    animate()
   }
 
   render() {
