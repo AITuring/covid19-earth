@@ -167,7 +167,7 @@ class Earth extends React.Component {
       requestAnimationFrame(animate);
       screenRender();
       // 每次旋转角速度0.04弧度
-      meshGroup.rotateY(0.04)
+      meshGroup.rotateY(0.004)
     }
 
     // 创建点阵图
